@@ -1,10 +1,11 @@
 import { test, expect } from '@playwright/test';
 import * as OTPAuth from "otpauth";
 import * as dotenv from 'dotenv';
+import { getEnvProps } from '../../../utils/env';
 
 dotenv.config();
 
-const secretKey  = process.env.HEROKU_SECRET_KEY as string;
+const secretKey  = getEnvProps('HEROKU_SECRET_KEY');
 const totp = new OTPAuth.TOTP({
   issuer: "Heroku",
   label: "Dao%20Quyen",
@@ -19,8 +20,8 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('Login successfully', async ({ page }) => {
-  const username  = process.env.HEROKU_USERNAME as string;
-  const password = process.env.HEROKU_PWD as string;
+  const username  = getEnvProps('HEROKU_USERNAME');
+  const password = getEnvProps('HEROKU_PWD');
 
   await test.step('Go to Login page', async () => {
     await page.getByRole('button', { name: 'Login' }).click();
