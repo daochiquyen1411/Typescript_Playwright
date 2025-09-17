@@ -8,11 +8,11 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
-    environment: prod1
-    env: 1
-      HEROKU_USERNAME: ${{ secrets.HEROKU_USERNAME }}1
-      HEROKU_PWD: ${{ secrets.HEROKU_PWD }}11
-      HEROKU_SECRET_KEY: ${{ secrets.HEROKU_SECRET_KEY }}1
+    environment: prod
+    env: 
+      HEROKU_USERNAME: ${{ secrets.HEROKU_USERNAME }}
+      HEROKU_PWD: ${{ secrets.HEROKU_PWD }}
+      HEROKU_SECRET_KEY: ${{ secrets.HEROKU_SECRET_KEY }}
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
