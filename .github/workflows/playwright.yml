@@ -9,7 +9,7 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     environment: prod1
-    env: 
+    env: 1
       HEROKU_USERNAME: ${{ secrets.HEROKU_USERNAME }}1
       HEROKU_PWD: ${{ secrets.HEROKU_PWD }}11
       HEROKU_SECRET_KEY: ${{ secrets.HEROKU_SECRET_KEY }}1
