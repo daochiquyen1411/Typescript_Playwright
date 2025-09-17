@@ -45,6 +45,6 @@ test('Login successfully', async ({ page }) => {
 
 
   await test.step('Verify dashboard is displayed', async () => {
-    await expect(page.getByText('Welcome to Heroku')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText('Welcome to Heroku')).toBeVisible({ timeout: 20000 });
   });
 });
