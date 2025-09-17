@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import * as OTPAuth from "otpauth";
 import * as dotenv from 'dotenv';
-import { getEnvProps } from '../../../utils/env';
+import { getEnvProps } from '../../../framework/utils/env';
 
 dotenv.config();
 
