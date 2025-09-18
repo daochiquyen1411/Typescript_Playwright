@@ -22,9 +22,9 @@ test('Login successfully', async ({ page }) => {
 
   await test.step('Verify OTP authentication', async () => {
     let utcTimestamp = Date.now();
-    const otp = new OTP({otp_uri : "HEROKU_OTP_URI"});
+    const otp = new OTP("HEROKU_OTP_URI");
 
-    await page.getByRole('textbox', { name: 'Verification Code' }).fill(otp.getTOTPCode(utcTimestamp));
+    await page.getByRole('textbox', { name: 'Verification Code' }).fill(otp.getCode(utcTimestamp));
     await page.getByRole('button', { name: 'Verify' }).click();
   });
 
