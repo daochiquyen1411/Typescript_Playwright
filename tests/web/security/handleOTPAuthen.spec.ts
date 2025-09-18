@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { Env } from '../../../framework/config/env';
-import { OTP } from '../../../framework/utils/otp';
+import { Env } from '@env';
+import { OTP } from '@security/otp';
 
 test.beforeEach(async ({ page }) => {
   await page.goto('https://www.heroku.com/');
@@ -22,9 +22,15 @@ test('Login successfully', async ({ page }) => {
 
   await test.step('Verify OTP authentication', async () => {
     let utcTimestamp = Date.now();
-    const otp = new OTP({otp_uri : "HEROKU_OTP_URI"});
+    const otp = new OTP("HEROKU_OTP_URI");
+    const code = otp.getCode(utcTimestamp);
 
-    await page.getByRole('textbox', { name: 'Verification Code' }).fill(otp.getTOTPCode(utcTimestamp));
+    if (!otp.verify(code, 1)) {
+      throw new Error(`Generated OTP ${code} is not valid`);
+    } 
+    expect(otp.verify(code, 1)).toBeTruthy();
+
+    await page.getByRole('textbox', { name: 'Verification Code' }).fill(code);
     await page.getByRole('button', { name: 'Verify' }).click();
   });
 
