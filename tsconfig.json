@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "esModuleInterop": true,
+
+    "baseUrl": ".",                
+    "paths": {
+      "@framework/*": ["framework/*"],
+      "@env": ["framework/env/env"],
+      "@security/*": ["framework/security/*"]
+    }
+  },
+  "include": ["framework", "tests", "playwright.config.ts"]
+}
