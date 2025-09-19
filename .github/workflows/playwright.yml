@@ -4,37 +4,77 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+# Needed for Pages deployment
+permissions:
+  contents: read
+  pages: write
+  id-token: write    
+# Prevent overlapping Pages deployments
+concurrency:
+  group: "pages"
+  cancel-in-progress: true  
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
-
     environment: prod
     env: 
       HEROKU_USERNAME: ${{ secrets.HEROKU_USERNAME }}
       HEROKU_PWD: ${{ secrets.HEROKU_PWD }}
       HEROKU_OTP_URI: ${{ secrets.HEROKU_OTP_URI }}
-
     steps:
     - uses: actions/checkout@v4
-
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
-
     - name: Install dependencies
       run: npm ci
-
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
-
     - name: Run Playwright tests
       run: npx playwright test
 
-    - uses: actions/upload-artifact@v4
-      if: always()
+    - name: Upload Playwright HTML report (artifact)
+      if: always() && hashFiles('playwright-report/**') != ''
+      uses: actions/upload-artifact@v4
       with:
         name: playwright-report
         path: playwright-report/
+        retention-days: 30    
+
+    - name: Upload raw test artifacts (videos/screenshots/traces)
+      if: always() && hashFiles('test-results/**') != '' 
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-test-results
+        path: test-results/
         retention-days: 30
-        
+
+    - name: Upload Pages artifact
+      if: ${{ always()
+            && (
+                  (github.event_name == 'push' && github.ref == 'refs/heads/main')
+                  || (github.event_name == 'pull_request' && github.base_ref == 'main')
+                )
+            && hashFiles('playwright-report/**') != '' }}
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: playwright-report/
+
+  deploy:
+    needs: test
+    if: ${{ always()
+          && (
+              (github.event_name == 'push' && github.ref == 'refs/heads/main')
+              || (github.event_name == 'pull_request' && github.base_ref == 'main')
+             ) 
+        }}
+    runs-on: ubuntu-latest
+    # Must be job-level; do NOT try to reference steps here
+    environment: github-pages
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Show deployed URL
+        run: echo "Playwright report ${{ steps.deployment.outputs.page_url }}"
