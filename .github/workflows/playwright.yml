@@ -75,4 +75,4 @@ jobs:
         url: ${{ steps.deployment.outputs.page_url }}
 
     - name: Show deployed URL
-      run: echo "Playwright report: ${{ steps.deployment.outputs.page_url }}"
+      run: echo "Playwright report available at ${{ steps.deployment.outputs.page_url }}"
