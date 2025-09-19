@@ -75,5 +75,4 @@ jobs:
         url: ${{ steps.deployment.outputs.page_url }}
 
     - name: Show deployed URL
-      if: always()
       run: echo "Playwright report: ${{ steps.deployment.outputs.page_url }}"
