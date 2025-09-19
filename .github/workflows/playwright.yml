@@ -53,7 +53,7 @@ jobs:
       with:
         path: playwright-report/
 
-deploy:
+  deploy:
     needs: test
     if: always()
     runs-on: ubuntu-latest
