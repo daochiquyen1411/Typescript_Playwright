@@ -53,17 +53,18 @@ jobs:
       with:
         path: playwright-report/
 
-  deploy:
+deploy:
     needs: test
     if: always()
     runs-on: ubuntu-latest
-    # The environment MUST be job-level, not step-level
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    # Must be job-level; do NOT try to reference steps here
+    environment: github-pages
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-      - name: Show deployed URL
-        run: echo "Playwright report: ${{ steps.deployment.outputs.page_url }}"
+      - name: Show deployed URL in logs and summary
+        run: |
+          echo "Playwright report: ${{ steps.deployment.outputs.page_url }}"
+          echo "### Playwright report" >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
