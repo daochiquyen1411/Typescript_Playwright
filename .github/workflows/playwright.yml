@@ -59,7 +59,7 @@ jobs:
         path: test-results/
         retention-days: 30
 
-      # ---- Publish HTML report to GitHub Pages (viewable online) ----
+    # ---- Publish HTML report to GitHub Pages (viewable online) ----
     - name: Upload Pages artifact
       if: always()
       uses: actions/upload-pages-artifact@v3
@@ -70,3 +70,10 @@ jobs:
       if: always()
       id: deployment
       uses: actions/deploy-pages@v4
+      environment:
+        name: github-pages
+        url: ${{ steps.deployment.outputs.page_url }}
+
+    - name: Show deployed URL
+      if: always()
+      run: echo "Playwright report: ${{ steps.deployment.outputs.page_url }}"
