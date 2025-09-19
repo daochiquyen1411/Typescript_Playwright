@@ -64,4 +64,4 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
       - name: Show deployed URL
-        run: echo "Playwright report: ${{ steps.deployment.outputs.page_url }}"
+        run: echo "Playwright report ${{ steps.deployment.outputs.page_url }}"
