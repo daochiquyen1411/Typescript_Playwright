@@ -4,7 +4,6 @@ test.beforeEach(async ({ page }) => {
   await page.goto('https://github.com/');
 });
 
-
 test('Login fail', async ({ page }) => {
 
   await test.step('Go to Login page', async () => {
