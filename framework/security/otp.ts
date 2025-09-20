@@ -2,16 +2,39 @@ import * as OTPAuth from "otpauth";
 import { Env } from "../env/env";
 
 /**
- * Wrapper around `otpauth` to manage OTP (Time-based One-Time Passwords).
+ * Utility wrapper for managing OTP (One-Time Password) using `otpauth`.
  *
- * The class loads and parses an `otpauth://` URI from an environment variable,
- * then provides methods to generate and validate one-time passwords.
+ * Supports:
+ * - Loading configuration from an environment variable or direct `otpauth://` URI.
+ * - Lazy parsing and caching of the underlying `OTPAuth.TOTP` instance.
+ * - Generating current or time-shifted OTP codes.
+ * - Normalizing user-supplied tokens (trimming, digit conversion, uppercasing).
+ * - Verifying codes with detailed results (boolean, delta, and reason).
+ * - Refreshing the cached configuration if the env/URI changes at runtime.
  *
  * @example
  * ```ts
- * const otp = new OTP("HEROKU_OTP_URI");
- * const code = otp.getCode();          // Generate current OTP
- * const valid = otp.verify(code, 1);   // Verify with ±1 step window
+ * // From environment variable
+ * const otp = OTP.fromEnv("HEROKU_OTP_URI");
+ *
+ * // Generate the current OTP code
+ * const code = otp.getCode();
+ *
+ * // Verify a user-provided code with ±1 step tolerance
+ * const result = otp.verify(userInput, 1);
+ * if (result.ok) {
+ *   console.log("OTP valid, step delta:", result.delta);
+ * } else {
+ *   console.error("OTP invalid:", result.reason);
+ * }
+ *
+ * // Simple boolean check
+ * if (otp.verifyBool(userInput)) {
+ *   console.log("Code is valid");
+ * }
+ *
+ * // Refresh if the env variable changed
+ * otp.refresh();
  * ```
  */
 export class OTP { 
@@ -61,7 +84,6 @@ export class OTP {
      */
     getTOTP(): OTPAuth.TOTP {
         if (this.totp) return this.totp;
-
         const uri = this.getUri();
         let parsed: OTPAuth.URI;
         try {
