@@ -28,6 +28,9 @@ export default defineConfig({
     /* Base URL to use in actions like `await page.goto('/')`. */
     // baseURL: 'http://localhost:3000',
 
+    // Input the web attribute that you want fw to understand it as id, use to get locator by id 
+    // testIdAttribute: 'test',
+
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
     // screenshot: 'only-on-failure',

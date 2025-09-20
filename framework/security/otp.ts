@@ -15,51 +15,75 @@ import { Env } from "../env/env";
  * ```
  */
 export class OTP { 
-    /**
-     * Name of the environment variable that stores the otpauth URI.
-     * Example: `"OTP_URI"`.
-     */
-    private envKey: string;
+    /** Stores either a direct otpauth URI or an env key to load from. */
+    private readonly uri?: string;
+    private readonly envKey?: string;
 
-    /**
-     * Cached `OTPAuth.TOTP` instance, parsed from the otpauth URI.
-     * Initialized lazily on first call to `getTOTP()`.
-     */
+    /** Cached TOTP instance after the first parse. */
     private totp?: OTPAuth.TOTP;
 
-    /**
-     * Create a new OTP helper.
-     * @param envKey - The name of the environment variable that stores the otpauth:// URI.
-     */
-    constructor(envKey : string) {
-        this.envKey = envKey;
+    private constructor(opts: { uri?: string; envKey?: string }) {
+        this.uri = opts.uri;
+        this.envKey = opts.envKey;
     }
 
     /**
-     * Get a TOTP instance parsed from the otpauth URI in the environment variable.
-     * - Caches the instance after the first call for performance.
-     * - Throws if the URI is missing or invalid.
-     * @returns OTPAuth.TOTP instance
+     * Create an OTP instance from an environment variable
+     * (e.g. "OTP_URI" or "HEROKU_OTP_URI").
      */
-    getTOTP(): OTPAuth.TOTP {   
+    static fromEnv(envKey: string): OTP {
+        return new OTP({ envKey });
+    }
+
+    /**
+     * Create an OTP instance from a direct otpauth:// URI string.
+     */
+    static fromUri(uri: string): OTP {
+        return new OTP({ uri });
+    }
+
+    
+    /**
+     * Resolve the otpauth URI.
+     * - Uses the direct `uri` if provided.
+     * - Otherwise loads from the given env variable.
+     * @throws If no URI source is provided.
+     */
+    private getUri(): string {
+        if (this.uri && this.uri.trim()) return this.uri.trim();
+        if (this.envKey) return Env.getString(this.envKey);
+        throw new Error("OTP: No URI or envKey provided.");
+    }
+
+    /**
+     * Get (and cache) a parsed TOTP instance from the otpauth URI.
+     * @throws If the URI is invalid or not a TOTP configuration.
+     */
+    getTOTP(): OTPAuth.TOTP {
         if (this.totp) return this.totp;
 
-        const uri = Env.get(this.envKey); 
-        const parsed = OTPAuth.URI.parse(uri);
+        const uri = this.getUri();
+        let parsed: OTPAuth.URI;
+        try {
+            parsed = OTPAuth.URI.parse(uri);
+        } catch (e) {
+            throw new Error(
+                `OTP: Invalid otpauth URI (${this.envKey ?? "direct"}): ${(e as Error).message}`
+            );
+        }
 
         if (!(parsed instanceof OTPAuth.TOTP)) {
-            throw new Error(`Biến ${this.envKey} không phải otpauth TOTP hợp lệ.`);
+            throw new Error(
+                `OTP: The provided URI (${this.envKey ?? "direct"}) is not a TOTP configuration.`
+            );
         }
+
         this.totp = parsed;
         return this.totp;
     }
 
     /**
-     * Generate a TOTP code.
-     * @param timestamp - Optional UNIX timestamp (ms). 
-     *                    If provided, generates the code for that time. 
-     *                    If omitted, generates the current valid code.
-     * @returns OTP code as a string
+     * Generate a TOTP code at the given timestamp (ms) or for the current time.
      */
     getCode(timestamp?: number): string {
         const totp = this.getTOTP();
@@ -67,23 +91,61 @@ export class OTP {
     }
 
     /**
-     * Verify a user-provided OTP code against the expected TOTP.
-     * @param code - The OTP code to validate
-     * @param window - Allowed step drift (default = 1).
-     *                 Example: with 30s period, window=1 allows ±30s tolerance.
-     * @param timestamp - Optional UNIX timestamp (ms) for validation context
-     * @returns True if the code is valid, false otherwise
+     * Normalize a user-supplied token:
+     * - Trim whitespace
+     * - Convert full-width digits (０-９) to ASCII digits (0-9)
+     * - Uppercase any letters (for base32 alphabets)
      */
-    verify(code: string, window = 1, timestamp?: number): boolean {
+    private normalizeToken(input: string): string {
+        const toAsciiDigits = (s: string) =>
+        s.replace(/[０-９]/g, d => String.fromCharCode(d.charCodeAt(0) - 0xFF10 + 0x30));
+        return toAsciiDigits(input).replace(/\s+/g, "").toUpperCase();
+    }
+
+    /**
+     * Verify a user-provided OTP code against the expected TOTP.
+     *
+     * @param code - The OTP code to validate
+     * @param window - Allowed step drift (±window). Default = 1.
+     * @param timestamp - Optional timestamp (ms) to validate against
+     *
+     * @returns An object with:
+     *   - ok: true/false
+     *   - delta: number of steps offset if valid, null if invalid
+     *   - reason: optional string reason when invalid
+     */
+    verify(
+        code: string,
+        window = 1,
+        timestamp?: number
+    ): { ok: boolean; delta: number | null; reason?: string } {
         const totp = this.getTOTP();
-        const delta = totp.validate({ token: code, window, timestamp });
-        return delta !== null;
+
+        if (!code || typeof code !== "string") {
+        return { ok: false, delta: null, reason: "Empty or non-string code" };
+        }
+
+        const token = this.normalizeToken(code);
+        const delta = totp.validate({ token, window, timestamp });
+
+        return {
+        ok: delta !== null,
+        delta,
+        reason: delta === null ? "Invalid or out-of-window token" : undefined,
+        };
+    }
+
+    
+    /**
+     * Convenience wrapper: verify and return a simple boolean.
+     */
+    verifyBool(code: string, window = 1, timestamp?: number): boolean {
+        return this.verify(code, window, timestamp).ok;
     }
 
     /**
      * Clear the cached TOTP instance.
-     * Use this if the environment variable changes during runtime 
-     * and you want to re-parse a fresh TOTP.
+     * Use this if the environment variable or URI changes at runtime.
      */
     refresh(): void {
         this.totp = undefined;

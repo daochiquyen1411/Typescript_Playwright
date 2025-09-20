@@ -2,13 +2,15 @@ import { test, expect } from '@playwright/test';
 import { Env } from '@env';
 import { OTP } from '@security/otp';
 
+Env.require("HEROKU_USERNAME", "HEROKU_PWD", "HEROKU_OTP_URI");
+
 test.beforeEach(async ({ page }) => {
   await page.goto('https://www.heroku.com/');
 });
 
 test('Login successfully', async ({ page }) => {
-  const username  = Env.get('HEROKU_USERNAME');
-  const password = Env.get('HEROKU_PWD');
+  const username  = Env.getString('HEROKU_USERNAME');
+  const password = Env.getString('HEROKU_PWD');
 
   await test.step('Go to Login page', async () => {
     await page.getByRole('button', { name: 'Login' }).click();
@@ -22,7 +24,7 @@ test('Login successfully', async ({ page }) => {
 
   await test.step('Verify OTP authentication', async () => {
     let utcTimestamp = Date.now();
-    const otp = new OTP("HEROKU_OTP_URI");
+    const otp = OTP.fromEnv("HEROKU_OTP_URI");
     const code = otp.getCode(utcTimestamp);
 
     if (!otp.verify(code, 1)) {
