@@ -17,6 +17,9 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        shard: [1, 2, 3, 4]
     environment: prod
     env: 
       HEROKU_USERNAME: ${{ secrets.HEROKU_USERNAME }}
@@ -32,7 +35,7 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     - name: Run Playwright tests
-      run: npx playwright test
+      run: npx playwright test --shard=${{ matrix.shard }}/4
 
     - name: Upload Playwright HTML report (artifact)
       if: always() && hashFiles('playwright-report/**') != ''
