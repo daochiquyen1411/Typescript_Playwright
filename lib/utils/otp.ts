@@ -1,5 +1,5 @@
 import * as OTPAuth from "otpauth";
-import { Env } from "../env/env";
+import { Env } from "./env";
 
 /**
  * Utility wrapper for managing OTP (One-Time Password) using `otpauth`.

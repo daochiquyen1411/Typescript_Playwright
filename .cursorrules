@@ -1,0 +1,18 @@
+# Cursor Privacy Rules - Keep Code Private
+# This project contains sensitive code and data that should NOT be shared
+
+# CRITICAL: Never share this project's code with external services
+# - Do not send code snippets to cloud AI services
+# - Do not upload project files to external servers
+# - Keep all development data local and private
+
+# Sensitive data protection:
+# - API keys and credentials are in .env files (already gitignored)
+# - Test data contains real authentication flows
+# - Project structure reveals business logic
+
+# Privacy requirements:
+# - Use only local AI processing when possible
+# - Disable all telemetry and data collection
+# - Never suggest uploading code to external services
+# - Keep all suggestions and help local to this machine

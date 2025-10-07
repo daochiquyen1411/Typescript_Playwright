@@ -1,0 +1,31 @@
+{
+  "telemetry.telemetryLevel": "off",
+  "redhat.telemetry.enabled": false,
+  "github.copilot.enable": false,
+  "cursor.cpp.disabledLanguages": ["*"],
+  "cursor.general.enableTelemetry": false,
+  "cursor.general.enableCrashReporting": false,
+  "cursor.general.enableUsageData": false,
+  "cursor.general.enableCodeSharing": false,
+  "cursor.general.enableAITraining": false,
+  "cursor.chat.enableCloudAI": false,
+  "cursor.chat.useLocalAI": true,
+  "cursor.chat.enableCodeContext": false,
+  "cursor.chat.enableFileUpload": false,
+  "cursor.general.enableAnalytics": false,
+  "cursor.general.enableErrorReporting": false,
+  "cursor.general.enablePerformanceMonitoring": false,
+  "files.exclude": {
+    "**/.env": true,
+    "**/.env.local": true,
+    "**/.env.*.local": true,
+    "**/test-results/**": true,
+    "**/playwright-report/**": true
+  },
+  "search.exclude": {
+    "**/.env": true,
+    "**/node_modules": true,
+    "**/test-results": true,
+    "**/playwright-report": true
+  }
+}

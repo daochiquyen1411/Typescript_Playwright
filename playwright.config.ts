@@ -12,7 +12,8 @@ import { defineConfig, devices } from '@playwright/test';
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: './tests',
+  timeout: 30_000,
+  testDir: 'demo/tests',
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -29,14 +30,14 @@ export default defineConfig({
     // baseURL: 'http://localhost:3000',
 
     // Input the web attribute that you want fw to understand it as id, use to get locator by id 
-    // testIdAttribute: 'test',
+    testIdAttribute: 'data-test',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
     // screenshot: 'only-on-failure',
     screenshot: 'on',
     video: 'retain-on-failure',
-
+    headless: true,
     launchOptions: {
       args: [
         '--lang=en-US',
@@ -46,22 +47,35 @@ export default defineConfig({
   outputDir: 'test-results/',
   /* Configure projects for major browsers */
   projects: [
+    // Setup project for authentication
+    {
+      name: 'setup',
+      testMatch: /.*\.setup\.ts/,
+      use: { ...devices['Desktop Chrome'], channel: 'chrome' },
+    },
 
     {
       name: 'Google Chrome',
+      dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], channel: 'chrome' },
     },
 
     {
       name: 'Firefox',
+      dependencies: ['setup'],
       use: { ...devices['Desktop Firefox'] },
+      testIgnore: ['**/*otp*.spec.ts'],
     },
 
-    // {
-    //   name: 'chromium',
-    //   use: { ...devices['Desktop Chrome'] },
-    // },
-    // 
+    {
+      name: 'chromium',
+      use: { 
+        ...devices['Desktop Chrome'],
+        permissions: ["clipboard-read"], 
+      },
+      testIgnore: ['**/*otp*.spec.ts'],
+    },
+    
     // {
     //   name: 'webkit',
     //   use: { ...devices['Desktop Safari'] },
@@ -72,9 +86,11 @@ export default defineConfig({
     //   name: 'Mobile Chrome',
     //   use: { ...devices['Pixel 5'] },
     // },
+
     // {
     //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
+    //   use: { ...devices['iPhone 15'] },
+    //   testIgnore: ['**/*otp*.spec.ts'],
     // },
 
     /* Test against branded browsers. */

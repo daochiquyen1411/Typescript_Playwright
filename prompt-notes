@@ -1,0 +1,15 @@
+Use Playwright MCP Server to navigate to https://practicesoftwaretesting.com. Ensure that the MCP Server is actively handling the 
+browser automation to validate its integration. Do not simulate the tests statically or bypass the MCP Server. All interaction must
+be routed through MCP.
+
+Develop script using TypeScript, framework is following by POM pattern.
+
+Scenario:
+Click the login button
+Login with email "customer@practicesoftwaretesting.com" and password "welcome01"
+Then go to home page "https://practicesoftwaretesting.com/"
+Search for "Thor Hammer"
+Verify that the result contains "Thor Hammer"
+Click on "Thor Hammer" product
+Verify page title contains "Thor Hammer"
+Verify "Add to cart" button have back ground color = green

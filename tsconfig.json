@@ -1,17 +1,31 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "strict": true,
+    "module": "es2022",      // or "node16" / "nodenext" / "es2022"
+    "target": "es2022",      // or higher
+    "moduleResolution": "node",
     "esModuleInterop": true,
-
-    "baseUrl": ".",                
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
     "paths": {
-      "@framework/*": ["framework/*"],
-      "@env": ["framework/env/env"],
-      "@security/*": ["framework/security/*"]
+      "@lib/*": ["lib/*"],
+      "@pages/*": ["demo/pages/*"],
+      "@utils/*": ["lib/utils/*"],
+      "@factory/*": ["lib/factory/*"],
+      "@fixtures/*": ["lib/fixtures/*"],
+      "@helpers/*": ["lib/helpers/*"]
     }
   },
-  "include": ["framework", "tests", "playwright.config.ts"]
+  "include": [
+    "demo/tests/**/*",
+    "lib/**/*"
+, "demo/pages", "demo/fixtures"  ],
+  "exclude": [
+    "node_modules",
+    "test-results",
+    "playwright-report"
+  ]
 }

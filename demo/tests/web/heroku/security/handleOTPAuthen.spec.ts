@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { Env } from '@env';
-import { OTP } from '@security/otp';
+import { Env } from '@utils/env';
+import { OTP } from '@utils/otp';
 
 Env.require("HEROKU_USERNAME", "HEROKU_PWD", "HEROKU_OTP_URI");
 
